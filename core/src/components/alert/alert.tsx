@@ -400,7 +400,34 @@ export class Alert implements ComponentInterface, OverlayInterface {
 
     await this.delegateController.attachViewToDom();
 
-    await present(this, 'alertEnter', iosEnterAnimation, mdEnterAnimation);
+    const ariaDescribedBy = this.el.getAttribute('aria-describedby');
+    const ariaLabelledBy = this.el.getAttribute('aria-labelledby');
+
+    if (ariaDescribedBy) {
+      this.el.removeAttribute('aria-describedby');
+    }
+
+    if (ariaLabelledBy) {
+      this.el.removeAttribute('aria-labelledby');
+    }
+
+    await present(this, 'alertEnter', iosEnterAnimation, mdEnterAnimation).then(() => {
+      const firstButton =
+        this.el.querySelector<HTMLElement>('.alert-button-role-cancel') ||
+        this.el.querySelector<HTMLElement>('.alert-button');
+
+      if (firstButton) {
+        firstButton.focus();
+      }
+
+      if (ariaDescribedBy) {
+        this.el.setAttribute('aria-describedby', ariaDescribedBy);
+      }
+
+      if (ariaLabelledBy) {
+        this.el.setAttribute('aria-labelledby', ariaLabelledBy);
+      }
+    });
 
     unlock();
   }
