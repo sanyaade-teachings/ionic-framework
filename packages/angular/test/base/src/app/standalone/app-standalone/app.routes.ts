@@ -19,6 +19,14 @@ export const routes: Routes = [
       { path: 'overlay-controllers', loadComponent: () => import('../overlay-controllers/overlay-controllers.component').then(c => c.OverlayControllersComponent) },
       { path: 'button', loadComponent: () => import('../button/button.component').then(c => c.ButtonComponent) },
       { path: 'icon', loadComponent: () => import('../icon/icon.component').then(c => c.IconComponent) },
+      { path: 'split-pane', redirectTo: '/standalone/split-pane/inbox', pathMatch: 'full' },
+      {
+        path: 'split-pane',
+        loadComponent: () => import('../split-pane/split-pane.component').then(c => c.SplitPaneComponent),
+        children: [
+          { path: ':id', loadComponent: () => import('../split-pane/split-pane-page.component').then(c => c.SplitPanePageComponent) },
+        ]
+      },
       { path: 'tabs', redirectTo: '/standalone/tabs/tab-one', pathMatch: 'full' },
       {
         path: 'tabs',
