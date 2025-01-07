@@ -17,7 +17,7 @@ import {
 @Component({
   selector: 'app-split-pane',
   templateUrl: 'split-pane.component.html',
-  styleUrl: 'split-pane.component.css',
+  styleUrls: ['split-pane.component.css'],
   standalone: true,
   imports: [
     CommonModule,
