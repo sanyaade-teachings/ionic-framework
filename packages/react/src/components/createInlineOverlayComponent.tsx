@@ -59,6 +59,7 @@ export const createInlineOverlayComponent = <PropType, ElementType>(
       this.ref.current?.addEventListener('ionMount', this.handleIonMount);
       this.ref.current?.addEventListener('willPresent', this.handleWillPresent);
       this.ref.current?.addEventListener('didDismiss', this.handleDidDismiss);
+      this.ref.current?.addEventListener('willDismiss', this.handleWillDismiss);
     }
 
     componentDidUpdate(prevProps: IonicReactInternalProps<PropType>) {
@@ -97,6 +98,7 @@ export const createInlineOverlayComponent = <PropType, ElementType>(
          * avoid memory leaks.
          */
         node.removeEventListener('didDismiss', this.handleDidDismiss);
+        node.removeEventListener('willDismiss', this.handleWillDismiss);
         node.remove();
         detachProps(node, this.props);
       }
@@ -188,6 +190,20 @@ export const createInlineOverlayComponent = <PropType, ElementType>(
       this.props.onWillPresent && this.props.onWillPresent(evt);
     };
 
+    private handleWillDismiss = () => {
+      const wrapper = this.wrapperRef.current;
+      const el = this.ref.current;
+
+      if (wrapper && el) {
+        /**
+         * The state is updated while the overlay is dismissing
+         * to make sure that it sets before the overlay is removed.
+         * This is to avoid memory leaks.
+         */
+        this.setState({ isOpen: false });
+      }
+    };
+
     private handleDidDismiss = (evt: any) => {
       const wrapper = this.wrapperRef.current;
       const el = this.ref.current;
@@ -200,7 +216,15 @@ export const createInlineOverlayComponent = <PropType, ElementType>(
        */
       if (wrapper && el) {
         el.append(wrapper);
-        this.setState({ isOpen: false });
+
+        /**
+         * Detach the local event listener to prevent the function
+         * from running after the overlay has already been removed
+         * elsewhere.
+         * This is to avoid memory leaks when the overlay is quickly
+         * opened and closed multiple times in succession.
+         */
+        el.removeEventListener('didDismiss', this.handleDidDismiss);
       }
 
       this.props.onDidDismiss && this.props.onDidDismiss(evt);
